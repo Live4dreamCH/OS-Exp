@@ -21,7 +21,8 @@ int main()
     }
     else
     {
-        std::cout << "wrong? fork()=>" << fork_pid << ", my pid=" << getpid() << std::endl;
+        std::cerr << "wrong? fork()=>" << fork_pid << ", my pid=" << getpid() << std::endl;
+        return 1;
     }
     return 0;
 }
