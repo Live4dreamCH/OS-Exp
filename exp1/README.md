@@ -92,4 +92,162 @@
 > [root@ecs-osexp ~]# cat /proc/version  
 > Linux version 4.19.90-2003.4.0.0036.oe1.aarch64 (abuild@obs-worker-003) (gcc version 7.3.0 (GCC)) #1 SMP Mon Mar 23 19:06:43 UTC 2020
 
-git导入代码
+git导入代码  
+本地:
+
+> live4dream@lichenghao:~/OS$ git status
+> On branch main
+> Your branch is up-to-date with 'origin/main'.
+> Changes not staged for commit:
+>   (use "git add <file>..." to update what will be committed)
+>   (use "git checkout -- <file>..." to discard changes in working directory)
+> 
+>         modified:   exp1/MultiProcesses.cpp
+>         modified:   exp1/README.md
+>         modified:   exp1/makefile
+> 
+> Untracked files:
+>   (use "git add <file>..." to include in what will be committed)
+> 
+>         .gitignore
+>         exp1/MultiThreads.cpp
+>         exp1/example.cpp
+>         exp1/pointer.cpp
+> 
+> no changes added to commit (use "git add" and/or "git commit -a")
+> live4dream@lichenghao:~/OS$ git add *
+> live4dream@lichenghao:~/OS$ git commit -m "初步多线程"
+> [main 56feafe] 初步多线程
+>  6 files changed, 360 insertions(+), 12 deletions(-)
+>  create mode 100644 exp1/MultiThreads.cpp
+>  create mode 100644 exp1/example.cpp
+>  rewrite exp1/makefile (70%)
+>  create mode 100644 exp1/pointer.cpp
+> live4dream@lichenghao:~/OS$ git push
+> warning: push.default is unset; its implicit value has changed in
+> Git 2.0 from 'matching' to 'simple'. To squelch this message
+> and maintain the traditional behavior, use:
+> 
+>   git config --global push.default matching
+> 
+> To squelch this message and adopt the new behavior now, use:
+> 
+>   git config --global push.default simple
+> 
+> When push.default is set to 'matching', git will push local branches
+> to the remote branches that already exist with the same name.
+> 
+> Since Git 2.0, Git defaults to the more conservative 'simple'
+> behavior, which only pushes the current branch to the corresponding
+> remote branch that 'git pull' uses to update the current branch.
+> 
+> See 'git help config' and search for 'push.default' for further information.
+> (the 'simple' mode was introduced in Git 1.7.11. Use the similar mode
+> 'current' instead of 'simple' if you sometimes use older versions of Git)
+> 
+> Counting objects: 9, done.
+> Delta compression using up to 12 threads.
+> Compressing objects: 100% (8/8), done.
+> Writing objects: 100% (9/9), 4.81 KiB | 0 bytes/s, done.
+> Total 9 (delta 1), reused 0 (delta 0)
+> remote: Resolving deltas: 100% (1/1), completed with 1 local object.
+> To git@github.com:Live4dreamCH/OS-Exp.git
+>    a4353e3..56feafe  main -> main
+> live4dream@lichenghao:~/OS$ git config --global push.default simple
+> live4dream@lichenghao:~/OS$ git status
+> On branch main
+> Your branch is up-to-date with 'origin/main'.
+> Untracked files:
+>   (use "git add <file>..." to include in what will be committed)
+> 
+>         .gitignore
+> 
+> nothing added to commit but untracked files present (use "git add" to track)
+> live4dream@lichenghao:~/OS$ git add .gitignore 
+> live4dream@lichenghao:~/OS$ git commit -m "添加.gitignore"
+> [main b851585] 添加.gitignore
+>  1 file changed, 2 insertions(+)
+>  create mode 100644 .gitignore
+> live4dream@lichenghao:~/OS$ git push
+> Counting objects: 3, done.
+> Delta compression using up to 12 threads.
+> Compressing objects: 100% (2/2), done.
+> Writing objects: 100% (3/3), 309 bytes | 0 bytes/s, done.
+> Total 3 (delta 0), reused 0 (delta 0)
+> To git@github.com:Live4dreamCH/OS-Exp.git
+>    56feafe..b851585  main -> main
+
+在云端, clone代码:
+
+> [root@ecs-osexp ~]# git clone git@github.com:Live4dreamCH/OS-Exp.git
+> Cloning into 'OS-Exp'...
+> The authenticity of host 'github.com (192.30.255.113)' can't be established.
+> RSA key fingerprint is SHA256:nThbg6kXUpJWGl7E1IGOCspRomTxdCARLviKw6E5SY8.
+> Are you sure you want to continue connecting (yes/no)? yes
+> Warning: Permanently added 'github.com,192.30.255.113' (RSA) to the list of known hosts.
+> git@github.com: Permission denied (publickey).
+> fatal: Could not read from remote repository.
+> 
+> Please make sure you have the correct access rights
+> and the repository exists.
+
+由于仓库私有, 云端无法访问, 需要先配置账户信息:  
+[服务器上的 Git - 生成 SSH 公钥](https://git-scm.com/book/zh/v2/%E6%9C%8D%E5%8A%A1%E5%99%A8%E4%B8%8A%E7%9A%84-Git-%E7%94%9F%E6%88%90-SSH-%E5%85%AC%E9%92%A5)
+先生成SSH公钥, 再在GitHub上添加它, 为安全性, 此过程不记录命令行
+
+> [root@ecs-osexp ~]# git clone git@github.com:Live4dreamCH/OS-Exp.git
+> Cloning into 'OS-Exp'...
+> Warning: Permanently added the RSA host key for IP address '192.30.255.112' to the list of known hosts.
+> remote: Enumerating objects: 18, done.
+> remote: Counting objects: 100% (18/18), done.
+> remote: Compressing objects: 100% (13/13), done.
+> remote: Total 18 (delta 1), reused 18 (delta 1), pack-reused 0
+> Receiving objects: 100% (18/18), 5.72 KiB | 5.72 MiB/s, done.
+> Resolving deltas: 100% (1/1), done.
+> [root@ecs-osexp ~]# ls
+> OS-Exp
+
+clone完成, 在云上跑一下程序吧:
+
+> [root@ecs-osexp OS-Exp]# cd exp1/
+> [root@ecs-osexp exp1]# ls
+> example.cpp  makefile  MultiProcesses.cpp  MultiThreads.cpp  pointer.cpp  README.md
+> [root@ecs-osexp exp1]# make --version
+> GNU Make 4.2.1
+> Built for aarch64-openEuler-linux-gnu
+> Copyright (C) 1988-2016 Free Software Foundation, Inc.
+> License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+> This is free software: you are free to change and redistribute it.
+> There is NO WARRANTY, to the extent permitted by law.
+> [root@ecs-osexp exp1]# make MultiProcesses.out
+> g++ MultiProcesses.cpp -o MultiProcesses.out -Wall
+> ./MultiProcesses.out
+> main_pid=7780
+> I'm parent, fork()=>7781, my pid=7780
+> I'm child, fork()=>0, my pid=7781
+> [root@ecs-osexp exp1]# make MultiThreads.out
+> g++ MultiThreads.cpp -pthread -o MultiThreads.out -Wall
+> ./MultiThreads.out
+> fib(40)=102334155
+> now in main, pa->result[0]=102334155
+> fib(41)=165580141
+> now in main, pa->result[1]=165580141
+> fib(42)=267914296
+> now in main, pa->result[2]=267914296
+> fib(43)=433494437
+> now in main, pa->result[3]=433494437
+> now in main, pa->result[fib(4]=701408733
+> 44)=0
+> fib(now in main, pa->result[45)=5]=11349031701134903170
+> 
+> fib(46)=1836311903
+> now in main, pa->result[6]=1836311903
+> fib(47)=2971215073
+> now in main, pa->result[7]=2971215073
+> fib(now in main, pa->result[488)=]=48075269764807526976
+> 
+> now in main, pa->result[fib(949]=)=77787420497778742049
+
+结果与本地一致.
+
+已修改MultiThreads, 主线程等待执行时间最长的线程结束.

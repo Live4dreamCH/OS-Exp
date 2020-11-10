@@ -1,6 +1,7 @@
 #include <iostream>
 #include <pthread.h>
 #include <stdlib.h>
+#include <unistd.h>
 #define fibs 10
 
 // 给线程执行的函数传参数、或者把返回值带回到主线程
@@ -47,7 +48,10 @@ int main(void)
     //创建线程
     for (size_t i = 0; i < fibs; i++)
     {
-        ret = pthread_create(&id, &attr, &do_something, &pa[i]);
+        if(i != fibs - 1)
+            ret = pthread_create(&id, &attr, &do_something, &pa[i]);
+        else
+            ret = pthread_create(&id, NULL, &do_something, &pa[i]);
         //创建失败
         if (ret != 0)
         {
@@ -60,19 +64,19 @@ int main(void)
     pthread_attr_destroy(&attr);
 
     //创建成功, 主线程轮询结果
-    while (flag != fibs)
-    {
-        for (size_t i = 0; i < fibs; i++)
-        {
-            if (pa[i].result != 0)
-            {
-                std::cout << "now in main, pa->result[" << i << "]=" << pa[i].result << std::endl;
-                flag++;
-                pa[i].result = 0;
-            }
-        }
-    }
+    // while (flag != fibs)
+    // {
+    //     for (size_t i = 0; i < fibs; i++)
+    //     {
+    //         if (pa[i].result != 0)
+    //         {
+    //             std::cout << "now in main, pa->result[" << i << "]=" << pa[i].result << std::endl;
+    //             flag++;
+    //             pa[i].result = 0;
+    //         }
+    //     }
+    // }
     //如果不解绑, 新线程结束时, 需要主线程帮它释放资源,就得等它
-    // pthread_join(id, NULL);
+    pthread_join(id, NULL);
     return 0;
 }
