@@ -4,7 +4,7 @@
 
 ## 环境
 
-本地:wsl-Ubuntu16.04  CPU:6core Mem:8GB  
+本地:wsl-Ubuntu16.04  CPU:6core 12虚拟cpu Mem:8GB  
 > live4dream@lichenghao:~$ cat /proc/version  
 > Linux version 4.4.0-18362-Microsoft (Microsoft@Microsoft.com) (gcc version 5.4.0 (GCC) ) #1049-Microsoft Thu Aug 14 12:01:00 PST 2020
 
@@ -64,8 +64,9 @@
 > fib(now in main, pa->result[49)=7778742049
 > 9]=7778742049
 
-由于算出结果后主线程与计算线程竞争使用输出资源, 导致显示顺序有误. 可以对输出加锁,以保证输出串的完整性;
-但实际上, 后期希望能够用这种方法比较进程、线程切换的开销, 所以目前主线程死循环轮询的方式一定会删去(这种轮询会占满一个内核, 给实验带来误差)
+由于算出结果后主线程与计算线程竞争使用输出资源, 导致显示顺序有误. 可以对输出加锁,以保证输出串的完整性;  
+但实际上, 后期希望能够用这种方法比较进程、线程切换的开销, 所以目前主线程死循环轮询的方式一定会删去(这种轮询会占满一个内核, 给实验带来误差)  
+所以不用加锁
 
 配置好云服务器, 连接成功:
 
@@ -251,3 +252,107 @@ clone完成, 在云上跑一下程序吧:
 结果与本地一致.
 
 已修改MultiThreads, 主线程等待执行时间最长的线程结束.
+
+> [root@ecs-osexp exp1]# make MultiThreads.out
+> g++ MultiThreads.cpp -pthread -o MultiThreads.out -Wall
+> ./MultiThreads.out
+> fib(40)=102334155
+> fib(41)=165580141
+> fib(42)=267914296
+> fib(43)=433494437
+> fib(44)=701408733
+> fib(45)=1134903170
+> fib(46)=1836311903
+> fib(47)=2971215073
+> fib(48)=4807526976
+> fib(49)=7778742049
+
+此时没有输出资源的争夺了.
+
+验收反馈：老师希望能够在实验报告里添加多线程与多进程对比的目的、做法、体会等
+
+下一步计划：多进程执行fib, 加入计时功能, 对比线程进程性能, 写报告
+
+计时好方法:使用time执行命令:
+
+> live4dream@lichenghao:~/OS/exp1$ time ls
+> example.cpp  makefile  MultiProcesses.cpp  MultiProcesses_fib.cpp  MultiThreads.cpp  MultiThreads.out  pointer.cpp  README.md
+> 
+> real    0m0.009s
+> user    0m0.000s
+> sys     0m0.000s
+
+real是wall clock的时长, 即从开始运行到结束的时间差
+user是用户态进程占用cpu的时长,不包括io等时长
+sys是内核态消耗的CPU时间
+参见[Linux下clock计时函数学习](https://www.cnblogs.com/wfwenchao/p/5195022.html)
+
+对多线程与多进程(每个程序分别新建40个线程/进程,每个线程/进程分别计算10次fib(40)的值并累加)分别计时,得到如下结果:
+
+live4dream@lichenghao:~/OS/exp1$ make compare
+g++ MultiThreads.cpp -pthread -o MultiThreads.out -Wall
+time -v ./MultiThreads.out
+my pthread_id=139794623760128, 10 * fib(40)=1023341550
+...
+类似输出共40行,为节省空间,此处只保留首尾两行
+...
+my pthread_id=139794640668416, 10 * fib(40)=1023341550
+        Command being timed: "./MultiThreads.out"
+        User time (seconds): 295.12
+        System time (seconds): 0.01
+        Percent of CPU this job got: 1192%
+        Elapsed (wall clock) time (h:mm:ss or m:ss): 0:24.74
+        Average shared text size (kbytes): 0
+        Average unshared data size (kbytes): 0
+        Average stack size (kbytes): 0
+        Average total size (kbytes): 0
+        Maximum resident set size (kbytes): 1832
+        Average resident set size (kbytes): 0
+        Major (requiring I/O) page faults: 0
+        Minor (reclaiming a frame) page faults: 559
+        Voluntary context switches: 0
+        Involuntary context switches: 0
+        Swaps: 0
+        File system inputs: 0
+        File system outputs: 0
+        Socket messages sent: 0
+        Socket messages received: 0
+        Signals delivered: 0
+        Page size (bytes): 4096
+        Exit status: 0
+g++ MultiProcesses_fib.cpp -o MultiProcesses_fib.out -Wall
+time -v ./MultiProcesses_fib.out
+my p_id=5991, 10 * fib(40)=1023341550
+...
+类似输出共40行,为节省空间,此处只保留首尾两行
+...
+my p_id=6017, 10 * fib(40)=1023341550
+        Command being timed: "./MultiProcesses_fib.out"
+        User time (seconds): 300.45
+        System time (seconds): 0.10
+        Percent of CPU this job got: 1156%
+        Elapsed (wall clock) time (h:mm:ss or m:ss): 0:25.98
+        Average shared text size (kbytes): 0
+        Average unshared data size (kbytes): 0
+        Average stack size (kbytes): 0
+        Average total size (kbytes): 0
+        Maximum resident set size (kbytes): 1360
+        Average resident set size (kbytes): 0
+        Major (requiring I/O) page faults: 0
+        Minor (reclaiming a frame) page faults: 7870
+        Voluntary context switches: 0
+        Involuntary context switches: 0
+        Swaps: 0
+        File system inputs: 0
+        File system outputs: 0
+        Socket messages sent: 0
+        Socket messages received: 0
+        Signals delivered: 0
+        Page size (bytes): 4096
+        Exit status: 0
+
+可以看到:  
+在执行相同计算任务时, 多线程在各项数据上均优于多进程:  
+内核态运行时间是多进程的1/10;  
+在12个虚拟内核的电脑上跑40个线程/进程, 30秒左右的总执行时间,两者之间差距有一秒多.而这个差距还将随着线程数/进程数的增加而不断加大.  
+事实上, 在2000年左右, 当时的互联网服务经常为了服务一个用户而新建一个
