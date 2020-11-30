@@ -273,6 +273,8 @@ clone完成, 在云上跑一下程序吧:
 
 下一步计划：多进程执行fib, 加入计时功能, 对比线程进程性能, 写报告
 
+多线程程序改用信号量实现主线程和其他线程同步结束,具体操作参见实验资料:进程内存实验指导书.doc
+
 计时好方法:使用time执行命令:
 
 > live4dream@lichenghao:~/OS/exp1$ time ls
@@ -286,6 +288,7 @@ real是wall clock的时长, 即从开始运行到结束的时间差
 user是用户态进程占用cpu的时长,不包括io等时长
 sys是内核态消耗的CPU时间
 参见[Linux下clock计时函数学习](https://www.cnblogs.com/wfwenchao/p/5195022.html)
+注意Linux下可能有两个time:[time和/usr/bin/time](https://www.cnblogs.com/kakaisgood/p/12718681.html)
 
 对多线程与多进程(每个程序分别新建40个线程/进程,每个线程/进程分别计算10次fib(40)的值并累加)分别计时,得到如下结果:
 
@@ -302,24 +305,6 @@ my pthread_id=139794640668416, 10 * fib(40)=1023341550
         System time (seconds): 0.01
         Percent of CPU this job got: 1192%
         Elapsed (wall clock) time (h:mm:ss or m:ss): 0:24.74
-        Average shared text size (kbytes): 0
-        Average unshared data size (kbytes): 0
-        Average stack size (kbytes): 0
-        Average total size (kbytes): 0
-        Maximum resident set size (kbytes): 1832
-        Average resident set size (kbytes): 0
-        Major (requiring I/O) page faults: 0
-        Minor (reclaiming a frame) page faults: 559
-        Voluntary context switches: 0
-        Involuntary context switches: 0
-        Swaps: 0
-        File system inputs: 0
-        File system outputs: 0
-        Socket messages sent: 0
-        Socket messages received: 0
-        Signals delivered: 0
-        Page size (bytes): 4096
-        Exit status: 0
 g++ MultiProcesses_fib.cpp -o MultiProcesses_fib.out -Wall
 time -v ./MultiProcesses_fib.out
 my p_id=5991, 10 * fib(40)=1023341550
@@ -332,27 +317,10 @@ my p_id=6017, 10 * fib(40)=1023341550
         System time (seconds): 0.10
         Percent of CPU this job got: 1156%
         Elapsed (wall clock) time (h:mm:ss or m:ss): 0:25.98
-        Average shared text size (kbytes): 0
-        Average unshared data size (kbytes): 0
-        Average stack size (kbytes): 0
-        Average total size (kbytes): 0
-        Maximum resident set size (kbytes): 1360
-        Average resident set size (kbytes): 0
-        Major (requiring I/O) page faults: 0
-        Minor (reclaiming a frame) page faults: 7870
-        Voluntary context switches: 0
-        Involuntary context switches: 0
-        Swaps: 0
-        File system inputs: 0
-        File system outputs: 0
-        Socket messages sent: 0
-        Socket messages received: 0
-        Signals delivered: 0
-        Page size (bytes): 4096
-        Exit status: 0
 
 可以看到:  
 在执行相同计算任务时, 多线程在各项数据上均优于多进程:  
 内核态运行时间是多进程的1/10;  
-在12个虚拟内核的电脑上跑40个线程/进程, 30秒左右的总执行时间,两者之间差距有一秒多.而这个差距还将随着线程数/进程数的增加而不断加大.  
-事实上, 在2000年左右, 当时的互联网服务经常为了服务一个用户而新建一个
+在12个虚拟内核的电脑上跑40个线程/进程, 30秒左右的总执行时间,线程节省了一秒多. 而这个差距还将随着线程数/进程数的增加而不断加大.  
+可以体会到线程的上下文切换的代价要比进程小得多(上下文切换需要程序由用户态进入内核态后进行, 通过比较内核态运行时长可直接得出此结论)  
+(学过CPU调度后应该意识到, 如果不对进程/线程的调度方式进行设置, 而系统默认使用非抢占方式的话, 可能没有发生上下文切换, 就得不到以上结果. 此时应当设置二者的调度方式后再观察结果)
