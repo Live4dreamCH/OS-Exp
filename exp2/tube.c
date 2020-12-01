@@ -20,9 +20,9 @@ int main()
         sprintf(OutPipe, "Child process 1 is sending message!\n"); // 给Outpipe赋值
         for (int i = 0; i < 5; i++)
         {
-            lockf(fd[1], 1, 0);        // 锁定管道
+            //lockf(fd[1], 1, 0);        // 锁定管道
             write(fd[1], OutPipe, 50); // 向管道写入数据
-            lockf(fd[1], 0, 0);        // 解除管道的锁定
+            //lockf(fd[1], 0, 0);        // 解除管道的锁定
             sleep(1);
         }
         // sleep(5); // 等待读进程读出数据
@@ -37,9 +37,9 @@ int main()
             sprintf(OutPipe, "Child process 2 is sending message!\n");
             for (int i = 0; i < 5; i++)
             {
-                lockf(fd[1], 1, 0);
+                //lockf(fd[1], 1, 0);
                 write(fd[1], OutPipe, 50); // 向管道写入数据
-                lockf(fd[1], 0, 0);
+                //lockf(fd[1], 0, 0);
                 sleep(0);
             }
             // sleep(5);

@@ -9,8 +9,7 @@ int wait_flag = 0;
 void stop();
 int main()
 {
-    int pid1, pid2;  //定义两个进程号变量
-    signal(2, stop); //或者signal(14,stop);
+    int pid1, pid2; //定义两个进程号变量
 
     while ((pid1 = fork()) == -1)
         ; //若创建子进程1不成功,则空循环
@@ -20,8 +19,12 @@ int main()
             ; //创建子进程2
         if (pid2 > 0)
         {
+            signal(14, stop); //或者signal(14,stop);
+
             wait_flag = 1;
-            sleep(5);       //父进程等待5秒
+            alarm(5); //父进程等待5秒
+            while (wait_flag)
+                ;
             kill(pid1, 16); //杀死进程1发中断号16
             kill(pid2, 17); //杀死进程2
             wait(0);        //等待第1个子进程1结束的信号
